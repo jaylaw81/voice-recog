@@ -16,7 +16,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     console.log(output);
     document.getElementById(
       "answer"
-    ).innerHTML = `${output} <br><a href='${sourceUrl}' target='_blank'>Source</a>`;
+    ).innerHTML = `${output} <br><a href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full Answer</a>`;
   }
 
   let commands = [];
