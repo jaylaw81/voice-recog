@@ -12,65 +12,31 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     recognition.start();
   });
 
-  function sendResponse(output) {
+  function sendResponse(output, sourceUrl) {
     console.log(output);
-    document.getElementById("answer").innerHTML = output;
+    document.getElementById(
+      "answer"
+    ).innerHTML = `${output} <br><a href='${sourceUrl}' target='_blank'>Source</a>`;
   }
 
-  const responses = {
-    age: "You need to be at least 17 years old to join the Army. If you are older than 35 years old, certain jobs may apply to you. <a href='https://www.goarmy.com/how-to-join/steps' target='_blank'>See all the steps to join</a>",
-    basic_general:
-      "Weeks 1 – 2 In this first phase, you’ll start to adapt to Army life and learn about discipline, teamwork, Army programs, traditions, and more.",
-    basic_toughness:
-      "Basic Training is challenging and meant to push you to become the best version of yourself. It will help you develop mentally and physically to overcome things you didn’t think possible. You’ll also realize that the military and Drill Sergeants are not here to break you. Their goal is to build you up, help you find your inner strength, and teach you to succeed in both the Army and everyday life.",
-    basic_length:
-      "Basic Training lasts approximately 10 weeks and varies slightly based on your Military Occupational Specialty (MOS).",
-    recruiter: "Let's talk with a recruiter - Open Live Chat",
-    basic_eating:
-      "Typically, you’ll eat in the dining facility (DFAC), which is the Army’s version of a chow hall or cafeteria. There may be instances when you’ll eat out in the field, in which case meals are brought along. Other times, you might eat pre-packaged Meals, Ready-to-Eat (MREs).",
-  };
-
-  const commands = [
-    {
-      keyword: "how old",
-      text: responses.age,
-      specificity: 2,
-    },
-    {
-      keyword: "basic training",
-      text: responses.basic_general,
-      specificity: 1,
-    },
-    {
-      keyword: "basic training hard",
-      text: responses.basic_toughness,
-      specificity: 2,
-    },
-    {
-      keyword: "hard is basic training",
-      text: responses.basic_toughness,
-      specificity: 2,
-    },
-    {
-      keyword: "how long basic training",
-      text: responses.basic_length,
-      specificity: 2,
-    },
-    {
-      keyword: "talk with",
-      text: responses.recruiter,
-      specificity: 2,
-    },
-    {
-      keyword: "Where do you eat while in Basic Training",
-      text: responses.basic_eating,
-      specificity: 1,
-    },
-  ];
-
+  let commands = [];
   const SIMILARITY_THRESHOLD = 0.4;
 
-  // Remove common stop words for better matching
+  async function loadCommands() {
+    try {
+      const response = await fetch("http://127.0.0.1:5000/api/faqs");
+      const data = await response.json();
+      commands = data.map((item) => ({
+        keyword: item.question.toLowerCase(),
+        text: item.answer,
+        sourceUrl: item.source_url,
+      }));
+      console.log("Commands loaded:", commands);
+    } catch (error) {
+      console.error("Error fetching FAQ data:", error);
+    }
+  }
+
   function preprocess(text) {
     const stopWords = ["do", "i", "to", "the", "a", "is", "and", "you", "be"];
     return text
@@ -80,7 +46,6 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       .join(" ");
   }
 
-  // Calculate string similarity using Dice Coefficient
   function getSimilarity(str1, str2) {
     const bigrams = (s) => {
       const result = [];
@@ -108,7 +73,6 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     document.getElementById("result").textContent = transcript;
     document.getElementById("confidence").textContent = confidence;
 
-    // Find best match
     const matches = commands.map((command) => ({
       ...command,
       similarity: getSimilarity(
@@ -124,10 +88,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
           command.exactMatch || command.similarity >= SIMILARITY_THRESHOLD
       )
       .sort(
-        (a, b) =>
-          b.exactMatch - a.exactMatch ||
-          b.similarity - a.similarity ||
-          b.specificity - a.specificity
+        (a, b) => b.exactMatch - a.exactMatch || b.similarity - a.similarity
       )[0];
 
     if (bestMatch) {
@@ -136,17 +97,21 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
           bestMatch.keyword
         } (Similarity: ${bestMatch.similarity.toFixed(2)})`
       );
-      sendResponse(bestMatch.text);
+      sendResponse(bestMatch.text, bestMatch.sourceUrl);
     } else {
       console.log("No matching command found.");
-      sendResponse("No matching command found. Sending text to Search");
-      window.open("https://www.goarmy.com/search?fulltext=" + transcript);
+      sendResponse(
+        "No matching command found. Sending text to Search",
+        "https://www.goarmy.com/search?fulltext=" + transcript
+      );
     }
   };
 
   recognition.onerror = (event) => {
     console.error("Speech recognition error:", event.error);
   };
+
+  loadCommands();
 } else {
   console.error("Speech recognition not supported in this browser.");
 }
