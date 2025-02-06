@@ -58,16 +58,13 @@ def scrape_page(url):
                     'answer': answer.get_text(strip=True),
                     'source_url': url
                 })
-                
-        
-     
         
         return faqs
     except Exception as e:
         print(f"Error scraping {url}: {e}")
         return []
 
-def scrape_goarmy():
+def scrape_site():
     sitemap_url = 'http://localhost:3000/sitemap.xml'
     all_urls = get_sitemap_urls(sitemap_url)
     
@@ -87,7 +84,7 @@ def scrape_goarmy():
 
 @app.route('/api/faqs')
 def get_faqs():
-    return jsonify(scrape_goarmy())
+    return jsonify(scrape_site())
 
 if __name__ == '__main__':
     app.run(port=5000)
