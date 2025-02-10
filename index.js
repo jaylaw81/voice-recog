@@ -21,7 +21,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     console.log(output);
     document.getElementById(
       "answer"
-    ).innerHTML = `${output} <br><a href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full Answer</a>`;
+    ).innerHTML = `${output} <br><a class='mt-8 inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full' href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full Answer</a>`;
 
     document.querySelector("#startButton").classList.remove("bg-red-500");
   }
