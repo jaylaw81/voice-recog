@@ -7,13 +7,22 @@
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   </head>
   <body class="flex flex-col h-screen items-center justify-center">
-    <div class="flex">
+    <div class="flex flex-col">
       <button
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
         id="startButton"
       >
         Ask a Question
       </button>
+    </div>
+    <div class="flex flex-col">
+      <canvas
+        class="flex"
+        id="visualizer"
+        width="600"
+        height="200"
+        style="background: transparent"
+      ></canvas>
     </div>
     <div class="flex flex-col items-center">
       <p class="text-2xl m-8" id="result"></p>

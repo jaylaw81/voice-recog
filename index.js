@@ -2,6 +2,61 @@
 const CACHE_TTL = 3600000; // 1 hour cache duration
 const CACHE_KEY = "faqCache";
 
+if (navigator.mediaDevices.getUserMedia) {
+  const startButton = document.getElementById("startButton");
+  const canvas = document.getElementById("visualizer");
+  const canvasCtx = canvas.getContext("2d");
+
+  let audioContext, analyser, microphone, dataArray;
+
+  startButton.addEventListener("click", async () => {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioContext.createAnalyser();
+      analyser.fftSize = 1024; // Higher resolution for smooth waveforms
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+
+      dataArray = new Uint8Array(analyser.fftSize);
+
+      visualize();
+    }
+  });
+
+  function visualize() {
+    requestAnimationFrame(visualize);
+    analyser.getByteTimeDomainData(dataArray);
+
+    canvasCtx.clearRect(0, 0, canvas.width, canvas.height); // Transparent background
+
+    canvasCtx.lineWidth = 2;
+    canvasCtx.strokeStyle = "rgba(0, 200, 255, 0.8)"; // Light blue waveform
+    canvasCtx.beginPath();
+
+    let sliceWidth = canvas.width / dataArray.length;
+    let x = 0;
+
+    for (let i = 0; i < dataArray.length; i++) {
+      let v = dataArray[i] / 128.0;
+      let y = (v * canvas.height) / 2;
+
+      if (i === 0) {
+        canvasCtx.moveTo(x, y);
+      } else {
+        canvasCtx.lineTo(x, y);
+      }
+
+      x += sliceWidth;
+    }
+
+    canvasCtx.stroke();
+  }
+} else {
+  console.error("getUserMedia not supported in this browser.");
+}
+
 // Check for browser compatibility
 if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
   const recognition = new (window.SpeechRecognition ||
@@ -15,6 +70,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
   startButton.addEventListener("click", () => {
     recognition.start();
     document.querySelector("#startButton").classList.add("bg-red-500");
+    document.querySelector("#visualizer").style.display = "flex";
   });
 
   function sendResponse(output, sourceUrl) {
@@ -24,6 +80,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     ).innerHTML = `${output} <br><a class='mt-8 inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full' href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full Answer</a>`;
 
     document.querySelector("#startButton").classList.remove("bg-red-500");
+    document.querySelector("#visualizer").style.display = "none";
   }
 
   let commands = [];
