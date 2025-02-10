@@ -14,6 +14,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
   const startButton = document.getElementById("startButton");
   startButton.addEventListener("click", () => {
     recognition.start();
+    document.querySelector("#startButton").classList.add("bg-red-500");
   });
 
   function sendResponse(output, sourceUrl) {
@@ -21,6 +22,8 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     document.getElementById(
       "answer"
     ).innerHTML = `${output} <br><a href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full Answer</a>`;
+
+    document.querySelector("#startButton").classList.remove("bg-red-500");
   }
 
   let commands = [];
