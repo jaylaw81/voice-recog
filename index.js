@@ -73,11 +73,15 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     document.querySelector("#visualizer").style.display = "flex";
   });
 
-  function sendResponse(output, sourceUrl) {
+  function sendResponse(output, sourceUrl, image) {
     console.log(output);
     document.getElementById(
       "answer"
     ).innerHTML = `${output} <br><a class='mt-8 inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full' href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full answer</a>`;
+
+    document.getElementById(
+      "image"
+    ).innerHTML = `<img src="https://www.goarmy.com${image}" />`;
 
     document.querySelector("#startButton").classList.remove("bg-red-500");
     document.querySelector("#visualizer").style.display = "none";
@@ -167,6 +171,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       keyword: item.question.toLowerCase(),
       text: item.answer,
       sourceUrl: item.source_url,
+      image: item.image,
     }));
   }
 
@@ -237,7 +242,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
           bestMatch.keyword
         } (Similarity: ${bestMatch.similarity.toFixed(2)})`
       );
-      sendResponse(bestMatch.text, bestMatch.sourceUrl);
+      sendResponse(bestMatch.text, bestMatch.sourceUrl, bestMatch.image);
     } else {
       console.log("No matching command found.");
       sendResponse(

@@ -14,6 +14,23 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 app = Flask(__name__)
 CORS(app)
 
+def get_first_image(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        first_image = soup.find('img')
+        if first_image:
+            return first_image['src']
+        else:
+            return None
+    except requests.exceptions.RequestException as e:
+        print(f"Request error: {e}")
+        return None
+    except Exception as e:
+         print(f"An error occurred: {e}")
+         return None
+
 def get_sitemap_urls(sitemap_url):
     try:
         s = requests.Session()
@@ -48,6 +65,7 @@ def scrape_page(url):
         # Pattern 1: FAQ pages with question/answer sections
         faq_items = soup.select('details[data-component="accordion"]')
         card_items = soup.select('.exposedgridcard')
+        hero_image = get_first_image(url)
         for item in faq_items:
             question = item.select_one('.accordion__subheading h3')
             answer = item.select_one('.accordion__body p')
@@ -57,6 +75,7 @@ def scrape_page(url):
                 faqs.append({
                     'question': question.get_text(strip=True).strip("?"),
                     'answer': answer.get_text(),
+                    'image': hero_image,
                     'source_url': url
                 })
 
@@ -69,6 +88,7 @@ def scrape_page(url):
                 faqs.append({
                     'question': question.get_text(strip=True).strip("?"),
                     'answer': answer.get_text(),
+                    'image': hero_image,
                     'source_url': url
                 })
 
