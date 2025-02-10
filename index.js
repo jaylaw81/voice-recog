@@ -204,7 +204,6 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     const processedTranscript = preprocess(transcript);
 
     document.getElementById("result").textContent = transcript;
-    //document.getElementById("confidence").textContent = confidence;
 
     const matches = commands.map((command) => ({
       ...command,
@@ -212,17 +211,25 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
         processedTranscript,
         preprocess(command.keyword)
       ),
-      exactMatch: processedTranscript === preprocess(command.keyword),
+      keywordMatch: preprocess(command.keyword)
+        .split(" ")
+        .some((word) => processedTranscript.includes(word)), // Check if any keyword matches
     }));
 
+    // Find the best match based on exact match, similarity, or loose keyword matching
     const bestMatch = matches
       .filter(
         (command) =>
-          command.exactMatch || command.similarity >= SIMILARITY_THRESHOLD
+          command.exactMatch ||
+          command.similarity >= SIMILARITY_THRESHOLD ||
+          command.keywordMatch
       )
-      .sort(
-        (a, b) => b.exactMatch - a.exactMatch || b.similarity - a.similarity
-      )[0];
+      .sort((a, b) => {
+        // Prioritize exact matches, then similarity, then keyword matches
+        if (b.exactMatch !== a.exactMatch) return b.exactMatch - a.exactMatch;
+        if (b.similarity !== a.similarity) return b.similarity - a.similarity;
+        return b.keywordMatch - a.keywordMatch;
+      })[0];
 
     if (bestMatch) {
       console.log(
