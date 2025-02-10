@@ -7,7 +7,7 @@ if (navigator.mediaDevices.getUserMedia) {
   const canvas = document.getElementById("visualizer");
   const canvasCtx = canvas.getContext("2d");
 
-  let audioContext, analyser, microphone, dataArray;
+  let audioContext, analyser, microphone, dataArray, animationFrameId, stream;
 
   startButton.addEventListener("click", async () => {
     if (!audioContext) {
@@ -81,6 +81,22 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
 
     document.querySelector("#startButton").classList.remove("bg-red-500");
     document.querySelector("#visualizer").style.display = "none";
+
+    let stream;
+
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then(function (mediaStream) {
+        stream = mediaStream;
+      })
+      .catch(function (error) {
+        console.error("Error accessing microphone:", error);
+      });
+
+    if (stream) {
+      stream.getAudioTracks().forEach((track) => track.stop());
+      stream = null; // Optionally release the stream reference
+    }
   }
 
   let commands = [];
@@ -211,6 +227,11 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
 
   recognition.onerror = (event) => {
     console.error("Speech recognition error:", event.error);
+  };
+
+  recognition.onspeechend = () => {
+    recognition.stop();
+    console.log("Speech recognition has stopped.");
   };
 
   loadCommands();
