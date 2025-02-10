@@ -47,6 +47,7 @@ def scrape_page(url):
         
         # Pattern 1: FAQ pages with question/answer sections
         faq_items = soup.select('details[data-component="accordion"]')
+        card_items = soup.select('.exposedgridcard')
         for item in faq_items:
             question = item.select_one('.accordion__subheading h3')
             answer = item.select_one('.accordion__body p')
@@ -54,11 +55,23 @@ def scrape_page(url):
             
             if question and answer:
                 faqs.append({
-                    'question': question.get_text(strip=True),
+                    'question': question.get_text(strip=True).strip("?"),
                     'answer': answer.get_text(strip=True),
                     'source_url': url
                 })
+
         
+        for item in card_items:
+            question = item.select_one('h3.card-content__heading')
+            answer = item.select_one('.rte p')
+            
+            if question and answer:
+                faqs.append({
+                    'question': question.get_text(strip=True).strip("?"),
+                    'answer': answer.get_text(strip=True),
+                    'source_url': url
+                })
+
         return faqs
     except Exception as e:
         print(f"Error scraping {url}: {e}")
@@ -71,7 +84,7 @@ def scrape_site():
     # Filter URLs for relevant content
     faq_urls = [
         url for url in all_urls
-        if re.search(r'(army-life|basic-training|how-to|requirements|basic-training|benefits)', url, re.I)
+        if re.search(r'(army-life|basic-training|how-to|requirements|basic-training|benefits|careers-and-jobs)', url, re.I)
     ]
     # Scrape filtered URLs
     all_faqs = []
