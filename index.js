@@ -1,3 +1,7 @@
+// Add these constants at the top of your code
+const CACHE_TTL = 3600000; // 1 hour cache duration
+const CACHE_KEY = "faqCache";
+
 // Check for browser compatibility
 if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
   const recognition = new (window.SpeechRecognition ||
@@ -24,17 +28,55 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
 
   async function loadCommands() {
     try {
+      // Try to get cached data
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      const now = Date.now();
+
+      if (cachedData) {
+        const { timestamp, data } = JSON.parse(cachedData);
+
+        // Use cache if it's still valid
+        if (now - timestamp < CACHE_TTL) {
+          commands = processData(data);
+          console.log("Using cached commands");
+          return;
+        }
+      }
+
+      // Fetch fresh data if cache is expired or missing
       const response = await fetch("http://127.0.0.1:5000/api/faqs");
       const data = await response.json();
-      commands = data.map((item) => ({
-        keyword: item.question.toLowerCase(),
-        text: item.answer,
-        sourceUrl: item.source_url,
-      }));
-      console.log("Commands loaded:", commands);
+
+      // Update cache
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          timestamp: now,
+          data: data,
+        })
+      );
+
+      commands = processData(data);
+      console.log("Commands loaded and cached");
     } catch (error) {
       console.error("Error fetching FAQ data:", error);
+
+      // Fall back to cache if available
+      const cachedData = localStorage.getItem(CACHE_KEY);
+      if (cachedData) {
+        console.log("Using stale cache due to API error");
+        commands = processData(JSON.parse(cachedData).data);
+      }
     }
+  }
+
+  // Add this helper function
+  function processData(data) {
+    return data.map((item) => ({
+      keyword: item.question.toLowerCase(),
+      text: item.answer,
+      sourceUrl: item.source_url,
+    }));
   }
 
   function preprocess(text) {
