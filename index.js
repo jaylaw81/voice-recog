@@ -113,7 +113,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     const processedTranscript = preprocess(transcript);
 
     document.getElementById("result").textContent = transcript;
-    document.getElementById("confidence").textContent = confidence;
+    //document.getElementById("confidence").textContent = confidence;
 
     const matches = commands.map((command) => ({
       ...command,
