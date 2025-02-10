@@ -56,7 +56,7 @@ def scrape_page(url):
             if question and answer:
                 faqs.append({
                     'question': question.get_text(strip=True).strip("?"),
-                    'answer': answer.get_text(strip=True),
+                    'answer': answer.get_text(),
                     'source_url': url
                 })
 
@@ -68,7 +68,7 @@ def scrape_page(url):
             if question and answer:
                 faqs.append({
                     'question': question.get_text(strip=True).strip("?"),
-                    'answer': answer.get_text(strip=True),
+                    'answer': answer.get_text(),
                     'source_url': url
                 })
 

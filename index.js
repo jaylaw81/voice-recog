@@ -77,7 +77,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
     console.log(output);
     document.getElementById(
       "answer"
-    ).innerHTML = `${output} <br><a class='mt-8 inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full' href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full Answer</a>`;
+    ).innerHTML = `${output} <br><a class='mt-8 inline-block bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full' href='${sourceUrl}#:~:text=${output}' target='_blank'>See the full answer</a>`;
 
     document.querySelector("#startButton").classList.remove("bg-red-500");
     document.querySelector("#visualizer").style.display = "none";
@@ -108,6 +108,10 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       const cachedData = localStorage.getItem(CACHE_KEY);
       const now = Date.now();
 
+      startButton.disabled = true;
+      startButton.textContent = "Loading Data...Please wait";
+      startButton.classList.add("bg-gray-400");
+
       if (cachedData) {
         const { timestamp, data } = JSON.parse(cachedData);
 
@@ -115,6 +119,10 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
         if (now - timestamp < CACHE_TTL) {
           commands = processData(data);
           console.log("Using cached commands");
+          startButton.disabled = false;
+          startButton.textContent = "Ask a Question";
+          startButton.classList.add("bg-blue-500");
+          startButton.classList.remove("bg-gray-400");
           return;
         }
       }
@@ -134,6 +142,10 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
 
       commands = processData(data);
       console.log("Commands loaded and cached");
+      startButton.disabled = false;
+      startButton.textContent = "Ask a Question";
+      startButton.classList.add("bg-blue-500");
+      startButton.classList.remove("bg-gray-400");
     } catch (error) {
       console.error("Error fetching FAQ data:", error);
 
@@ -142,6 +154,9 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       if (cachedData) {
         console.log("Using stale cache due to API error");
         commands = processData(JSON.parse(cachedData).data);
+        startButton.disabled = false;
+        startButton.textContent = "Ask a Question";
+        startButton.classList.add("bg-blue-500");
       }
     }
   }
