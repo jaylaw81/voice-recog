@@ -1,5 +1,5 @@
 {
-  "sitemap": "http://localhost:3000/sitemap.xml",
+  "sitemap": "https://www.goarmy.com/sitemap.xml",
   "faq_url_pattern": "(army-life|basic-training|how-to|requirements|basic-training|benefits|find-your-path|specialty-careers|job-training)",
   "scrape_patterns": [
     {

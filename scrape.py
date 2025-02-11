@@ -15,6 +15,14 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 app = Flask(__name__)
 CORS(app)
 
+# Define custom headers to mimic a browser
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Connection": "keep-alive"
+}
+
 # Load configuration from config.json
 def load_config():
     try:
@@ -28,7 +36,7 @@ config = load_config()
 
 def get_first_image(url):
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
         soup = BeautifulSoup(response.content, 'html.parser')
         first_image = soup.find('img')
@@ -46,7 +54,7 @@ def get_first_image(url):
 def get_sitemap_urls(sitemap_url):
     try:
         s = requests.Session()
-        response = s.get(sitemap_url)
+        response = s.get(sitemap_url, headers=HEADERS)
         response.raise_for_status()
         sitemap = xmltodict.parse(response.content)
         
@@ -68,7 +76,7 @@ def get_sitemap_urls(sitemap_url):
 def scrape_page(url):
     try:
         s = requests.Session()
-        response = s.get(url, verify=certifi.where())
+        response = s.get(url, headers=HEADERS, verify=certifi.where())
         soup = BeautifulSoup(response.text, 'html.parser')
         faqs = []  # List to store the extracted FAQs
         hero_image = get_first_image(url)  # Fetch the hero image

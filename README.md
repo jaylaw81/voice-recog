@@ -17,7 +17,7 @@ https://www.npmjs.com/package/serve
 
 ## Configuration
 
-To configure your scraper, edit the config.json
+To configure your scraper, create a `./config.json`
 
 `sitemap`
 contains the path to your sitemap.xml file
