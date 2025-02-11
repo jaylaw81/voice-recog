@@ -56,3 +56,9 @@ The response element to return in the Search
   ]
 }
 ```
+
+## Caching
+
+The Javascript will cache the API data for 1hr (3600000ms) in `localStorage`.
+
+After cache timeout occurs, refreshing the JS page will invalidate the `localStorage` cache and call the API to retrieve new data and re-cache to `localStorage`
