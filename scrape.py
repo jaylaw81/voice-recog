@@ -70,39 +70,36 @@ def scrape_page(url):
         s = requests.Session()
         response = s.get(url, verify=certifi.where())
         soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Look for FAQ content patterns
-        faqs = []
-        
-        # Pattern 1: FAQ pages with question/answer sections
-        faq_items = soup.select('details[data-component="accordion"]')
-        card_items = soup.select('.exposedgridcard')
-        hero_image = get_first_image(url)
-        for item in faq_items:
-            question = item.select_one('.accordion__subheading h3')
-            answer = item.select_one('.accordion__body p')
-            print(f"URL {url} Question: {question}")
-            
-            if question and answer:
-                faqs.append({
-                    'question': question.get_text(strip=True).strip("?"),
-                    'answer': answer.get_text(),
-                    'image': hero_image,
-                    'source_url': url
-                })
+        faqs = []  # List to store the extracted FAQs
+        hero_image = get_first_image(url)  # Fetch the hero image
 
-        
-        for item in card_items:
-            question = item.select_one('h3.card-content__heading')
-            answer = item.select_one('.rte p')
-            
-            if question and answer:
-                faqs.append({
-                    'question': question.get_text(strip=True).strip("?"),
-                    'answer': answer.get_text(),
-                    'image': hero_image,
-                    'source_url': url
-                })
+        # Load scrape patterns from config
+        scrape_patterns = config.get("scrape_patterns", [])
+
+        # Process each pattern in the array
+        for pattern_config in scrape_patterns:
+            # Get the selectors for the current pattern
+            selector = pattern_config.get("selector")
+            question_selector = pattern_config.get("question")
+            answer_selector = pattern_config.get("answer")
+
+            if not selector or not question_selector or not answer_selector:
+                continue  # Skip if any selector is missing
+
+            # Find all items matching the selector
+            items = soup.select(selector)
+            for item in items:
+                question = item.select_one(question_selector)
+                answer = item.select_one(answer_selector)
+
+                # Validate and store the question and answer
+                if question and answer:
+                    faqs.append({
+                        "question": question.get_text(strip=True).strip("?"),
+                        "answer": answer.get_text(),
+                        "image": hero_image,
+                        "source_url": url
+                    })
 
         return faqs
     except Exception as e:
