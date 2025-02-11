@@ -104,7 +104,7 @@ def scrape_site():
     # Filter URLs for relevant content
     faq_urls = [
         url for url in all_urls
-        if re.search(r'(army-life|basic-training|how-to|requirements|basic-training|benefits|careers-and-jobs)', url, re.I)
+        if re.search(r'(army-life|basic-training|how-to|requirements|basic-training|benefits|find-your-path|specialty-careers|job-training)', url, re.I)
     ]
     # Scrape filtered URLs
     all_faqs = []
