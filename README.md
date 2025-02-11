@@ -1,5 +1,11 @@
 # Voice API Search
 
+A very small voice activated web search tool.
+
+Utilizing the [Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API) and `python` this small
+little app will parse a sitemap.xml file and based on a configuration file allow a user to interact
+with the browser via voice to search a site and return "somewhat" acurate results.
+
 # Run small App
 
 I use `serve` to run a quick local instance.
