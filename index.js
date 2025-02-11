@@ -70,7 +70,7 @@ if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
   startButton.addEventListener("click", () => {
     recognition.start();
     document.querySelector("#startButton").classList.add("bg-red-500");
-    document.querySelector("#visualizer").style.display = "flex";
+    document.querySelector("#visualizer").style.display = "block";
   });
 
   function sendResponse(output, sourceUrl, image) {
