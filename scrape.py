@@ -1,4 +1,5 @@
 # Requires: pip install requests beautifulsoup4 flask flask-cors xmltodict
+import json
 from flask import Flask, jsonify
 from flask_cors import CORS
 import requests
@@ -13,6 +14,17 @@ ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 app = Flask(__name__)
 CORS(app)
+
+# Load configuration from config.json
+def load_config():
+    try:
+        with open("config.json", "r") as config_file:
+            return json.load(config_file)
+    except Exception as e:
+        print(f"Error loading configuration: {e}")
+        return {}
+
+config = load_config()
 
 def get_first_image(url):
     try:
@@ -98,13 +110,19 @@ def scrape_page(url):
         return []
 
 def scrape_site():
-    sitemap_url = 'http://localhost:3000/sitemap.xml'
+
+    sitemap_path = config.get("sitemap", "")
+
+    sitemap_url = sitemap_path
     all_urls = get_sitemap_urls(sitemap_url)
+    
+    # Load FAQ URL pattern from config
+    faq_url_pattern = config.get("faq_url_pattern", "")
     
     # Filter URLs for relevant content
     faq_urls = [
         url for url in all_urls
-        if re.search(r'(army-life|basic-training|how-to|requirements|basic-training|benefits|find-your-path|specialty-careers|job-training)', url, re.I)
+        if re.search(faq_url_pattern, url, re.I)
     ]
     # Scrape filtered URLs
     all_faqs = []
