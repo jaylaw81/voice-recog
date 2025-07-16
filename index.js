@@ -1,5 +1,5 @@
 // Add these constants at the top of your code
-const CACHE_TTL = 3600000; // 1 hour cache duration
+const CACHE_TTL = 14400000; // 4 hour cache duration
 const CACHE_KEY = "faqCache";
 
 if (navigator.mediaDevices.getUserMedia) {

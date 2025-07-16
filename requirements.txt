@@ -4,3 +4,8 @@ flask
 flask-cors
 xmltodict
 certifi
+transformers
+torch
+sentence-transformers
+numpy
+scikit-learn
